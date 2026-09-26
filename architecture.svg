@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" width="1400" height="900" role="img"
+     aria-label="Architecture of the OAuth 2.0 and OIDC lab. A React or Next.js browser app talks only to a FastAPI backend-for-frontend, which runs the Authorization Code flow with PKCE against a swappable identity provider (Google or GitHub, Keycloak, or a self-written FastAPI OpenID Provider), stores tokens in Postgres, and calls a FastAPI resource server with a bearer token. Tokens never cross into the browser.">
+  <title>OAuth 2.0 / OIDC lab · architecture</title>
+  <desc>Authorization Code + PKCE behind a backend-for-frontend. Numbered arrows trace one login and one API call. Dashed arrows are 302 redirects carried by the browser; orange arrows carry tokens and stay on the server side of the trust boundary.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#1f2937"/>
+    </marker>
+    <marker id="arrow-accent" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9"
+            markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#c2410c"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="900" fill="#ffffff"/>
+
+  <g font-family="'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif" fill="#1f2937">
+
+    <!-- Title -->
+    <text x="40" y="44" font-size="22" font-weight="700">OAuth 2.0 / OIDC lab · architecture</text>
+    <text x="40" y="68" font-size="13" fill="#6b7280">Authorization Code + PKCE behind a backend-for-frontend. FastAPI holds every secret and token; the browser holds one httpOnly cookie.</text>
+
+    <!-- Column headers -->
+    <text x="360" y="94" font-size="11" fill="#6b7280" text-anchor="end" letter-spacing="1">BROWSER · PUBLIC</text>
+    <text x="400" y="94" font-size="11" fill="#6b7280" letter-spacing="1">SERVERS · CONFIDENTIAL</text>
+
+    <!-- Trust boundary -->
+    <line x1="380" y1="128" x2="380" y2="820" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 6"/>
+    <text transform="rotate(-90 371 690)" x="371" y="690" font-size="10" fill="#6b7280" text-anchor="middle" letter-spacing="1.5">TRUST BOUNDARY</text>
+
+    <!-- Step 2-3: browser <-> provider, over the top -->
+    <path d="M160 140 V116 H1170 V140" stroke="#1f2937" stroke-width="1.5" fill="none" stroke-dasharray="6 5"
+          marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    <g font-size="11" text-anchor="end">
+      <text x="1160" y="96"><tspan font-weight="700">2</tspan>  302 → provider /authorize?scope=openid&amp;state&amp;nonce&amp;code_challenge</text>
+      <text x="1160" y="110"><tspan font-weight="700">3</tspan>  user logs in and consents on the provider's own pages → 302 back with code</text>
+    </g>
+
+    <!-- ===== Browser ===== -->
+    <rect x="40" y="140" width="240" height="480" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+    <rect x="206" y="152" width="60" height="18" rx="9" fill="#e2e8f0"/>
+    <text x="236" y="165" font-size="10" text-anchor="middle" fill="#475569">Phase 1</text>
+    <text x="56" y="173" font-size="15" font-weight="700">Browser</text>
+    <text x="56" y="192" font-size="12" fill="#6b7280" font-family="Consolas, 'Courier New', monospace">React / Next.js SPA · :3000</text>
+    <g font-size="11.5">
+      <text x="56" y="228">Sign-in is a full navigation</text>
+      <text x="56" y="245">to /auth/login, never fetch()</text>
+      <text x="56" y="276">Holds one httpOnly session cookie</text>
+      <text x="56" y="307">Never holds id_token,</text>
+      <text x="56" y="324">access_token or refresh_token</text>
+      <text x="56" y="355">Calls the BFF with</text>
+      <text x="56" y="372">credentials: 'include'</text>
+      <text x="56" y="403">Sees the auth code once, in the</text>
+      <text x="56" y="420">callback URL, then never again</text>
+      <text x="56" y="462" fill="#6b7280">Variant to try once: SPA as public</text>
+      <text x="56" y="479" fill="#6b7280">client with PKCE, tokens in memory.</text>
+      <text x="56" y="496" fill="#6b7280">Feel the difference, don't ship it.</text>
+    </g>
+
+    <!-- ===== FastAPI BFF ===== -->
+    <rect x="480" y="140" width="320" height="310" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+    <rect x="726" y="152" width="60" height="18" rx="9" fill="#e2e8f0"/>
+    <text x="756" y="165" font-size="10" text-anchor="middle" fill="#475569">Phase 1</text>
+    <text x="496" y="173" font-size="15" font-weight="700">FastAPI BFF</text>
+    <text x="496" y="192" font-size="12" fill="#6b7280" font-family="Consolas, 'Courier New', monospace">OAuth client / relying party · :8000</text>
+    <g font-size="11.5">
+      <text x="496" y="226">Holds client_secret; builds the /authorize URL</text>
+      <text x="496" y="243">with state, nonce and PKCE code_challenge</text>
+      <text x="496" y="271">Exchanges code for tokens, server to server</text>
+      <text x="496" y="299">Verifies id_token via JWKS; keys users on sub</text>
+      <text x="496" y="327">Keeps tokens in Postgres; browser gets only sid</text>
+      <text x="496" y="355">Refreshes access_token when it expires</text>
+      <text x="496" y="383">CORS: exact origin + allow_credentials=True</text>
+    </g>
+    <g font-size="11" fill="#6b7280" font-family="Consolas, 'Courier New', monospace">
+      <text x="496" y="414">GET /auth/login · /auth/callback · /auth/me</text>
+      <text x="496" y="432">POST /auth/logout · GET /api/*</text>
+    </g>
+
+    <!-- Browser <-> BFF arrows -->
+    <g stroke="#1f2937" stroke-width="1.5" fill="none">
+      <path d="M280 200 H480" marker-end="url(#arrow)"/>
+      <path d="M280 270 H480" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+      <path d="M480 340 H280" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+      <path d="M280 410 H480" marker-end="url(#arrow)"/>
+    </g>
+    <g font-size="11" text-anchor="middle">
+      <text x="380" y="181"><tspan font-weight="700">1</tspan>  GET /auth/login</text>
+      <text x="380" y="194" fill="#6b7280">full page navigation</text>
+      <text x="380" y="251"><tspan font-weight="700">4</tspan>  GET /auth/callback?code&amp;state</text>
+      <text x="380" y="264" fill="#6b7280">browser follows the provider's 302</text>
+      <text x="380" y="321"><tspan font-weight="700">8</tspan>  Set-Cookie sid (httpOnly)</text>
+      <text x="380" y="334" fill="#6b7280">then 302 back to the app</text>
+      <text x="380" y="391"><tspan font-weight="700">9a</tspan>  fetch /api/* with cookie</text>
+      <text x="380" y="404" fill="#6b7280">CORS + credentials: 'include'</text>
+    </g>
+
+    <!-- BFF <-> Provider arrows -->
+    <g stroke-width="1.5" fill="none">
+      <path d="M800 200 H980" stroke="#1f2937" marker-end="url(#arrow)"/>
+      <path d="M980 250 H800" stroke="#c2410c" marker-end="url(#arrow-accent)"/>
+      <path d="M800 340 H980" stroke="#1f2937" marker-end="url(#arrow)"/>
+    </g>
+    <g font-size="11" text-anchor="middle">
+      <text x="890" y="181"><tspan font-weight="700">5</tspan>  POST /token</text>
+      <text x="890" y="194" fill="#6b7280">code + client_secret + verifier</text>
+      <text x="890" y="231" fill="#c2410c">id_token · access_token</text>
+      <text x="890" y="244" fill="#c2410c">· refresh_token</text>
+      <text x="890" y="306"><tspan font-weight="700">6</tspan>  GET discovery + /jwks</text>
+      <text x="890" y="319" fill="#6b7280">verify id_token:</text>
+      <text x="890" y="332" fill="#6b7280">iss · aud · exp · nonce</text>
+    </g>
+
+    <!-- ===== Postgres ===== -->
+    <rect x="480" y="520" width="260" height="120" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+    <text x="496" y="548" font-size="14" font-weight="700">Postgres · :5433</text>
+    <g font-size="11" font-family="Consolas, 'Courier New', monospace">
+      <text x="496" y="574">users(id, sub, iss, email, name)</text>
+      <text x="496" y="592">sessions(sid, user_id, access_token,</text>
+      <text x="556" y="610">refresh_token, expires_at)</text>
+    </g>
+    <text x="496" y="630" font-size="11" fill="#6b7280">the cookie carries sid only</text>
+
+    <!-- Step 7: BFF -> Postgres -->
+    <path d="M540 450 V520" stroke="#1f2937" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+    <text x="552" y="481" font-size="11"><tspan font-weight="700">7</tspan>  upsert user by sub</text>
+    <text x="552" y="494" font-size="11" fill="#6b7280">write tokens to sessions</text>
+
+    <!-- Step 9b: BFF -> Resource server -->
+    <path d="M770 450 V740 H980" stroke="#c2410c" stroke-width="1.5" fill="none" marker-end="url(#arrow-accent)"/>
+    <text x="782" y="596" font-size="11" fill="#c2410c"><tspan font-weight="700">9b</tspan>  Authorization:</text>
+    <text x="782" y="609" font-size="11" fill="#c2410c">Bearer access_token</text>
+
+    <!-- ===== Identity Provider ===== -->
+    <rect x="980" y="140" width="380" height="460" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+    <text x="996" y="173" font-size="15" font-weight="700">Identity Provider</text>
+    <text x="996" y="192" font-size="12" fill="#6b7280">OpenID Provider = OAuth Authorization Server</text>
+    <text x="996" y="210" font-size="11" fill="#6b7280" font-style="italic">swap the implementation by changing one discovery URL</text>
+    <g font-size="11" font-family="Consolas, 'Courier New', monospace">
+      <text x="996" y="240">/.well-known/openid-configuration</text>
+      <text x="996" y="258">/authorize</text><text x="1130" y="258" fill="#6b7280">login + consent pages</text>
+      <text x="996" y="276">/token</text><text x="1130" y="276" fill="#6b7280">code → tokens</text>
+      <text x="996" y="294">/jwks</text><text x="1130" y="294" fill="#6b7280">RS256 public keys</text>
+      <text x="996" y="312">/userinfo</text><text x="1130" y="312" fill="#6b7280">profile claims</text>
+    </g>
+
+    <!-- Provider option cards -->
+    <rect x="996" y="336" width="348" height="64" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <rect x="1276" y="344" width="58" height="18" rx="9" fill="#e2e8f0"/>
+    <text x="1305" y="357" font-size="10" text-anchor="middle" fill="#475569">Phase 1</text>
+    <text x="1008" y="359" font-size="12" font-weight="700">Google (OIDC) · GitHub (OAuth only)</text>
+    <text x="1008" y="378" font-size="11" fill="#6b7280">GitHub sends no id_token, so you call /user instead</text>
+    <text x="1008" y="392" font-size="11" fill="#6b7280">that contrast is the OAuth-vs-OIDC lesson</text>
+
+    <rect x="996" y="412" width="348" height="64" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <rect x="1276" y="420" width="58" height="18" rx="9" fill="#e2e8f0"/>
+    <text x="1305" y="433" font-size="10" text-anchor="middle" fill="#475569">Phase 2</text>
+    <text x="1008" y="435" font-size="12" font-weight="700">Keycloak in Docker · :8080</text>
+    <text x="1008" y="454" font-size="11" fill="#6b7280">realms, clients, consent screen, refresh rotation,</text>
+    <text x="1008" y="468" font-size="11" fill="#6b7280">introspection, client credentials for machine clients</text>
+
+    <rect x="996" y="488" width="348" height="64" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <rect x="1276" y="496" width="58" height="18" rx="9" fill="#e2e8f0"/>
+    <text x="1305" y="509" font-size="10" text-anchor="middle" fill="#475569">Phase 4</text>
+    <text x="1008" y="511" font-size="12" font-weight="700">Your own OpenID Provider · FastAPI :8002</text>
+    <text x="1008" y="530" font-size="11" fill="#6b7280">RSA key pair, RS256 id_tokens, Jinja2 login + consent</text>
+    <text x="1008" y="544" font-size="11" fill="#6b7280">same five endpoints, so the BFF needs no code change</text>
+
+    <text x="996" y="580" font-size="11" fill="#6b7280">Final exam: Authlib's client must accept every provider your BFF does.</text>
+
+    <!-- ===== Resource server ===== -->
+    <rect x="980" y="680" width="380" height="120" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+    <rect x="1286" y="692" width="60" height="18" rx="9" fill="#e2e8f0"/>
+    <text x="1316" y="705" font-size="10" text-anchor="middle" fill="#475569">Phase 3</text>
+    <text x="996" y="709" font-size="15" font-weight="700">FastAPI Resource Server</text>
+    <text x="996" y="727" font-size="12" fill="#6b7280" font-family="Consolas, 'Courier New', monospace">protected API · :8001</text>
+    <g font-size="11.5">
+      <text x="996" y="752">Depends(require_token) reads the bearer header</text>
+      <text x="996" y="769">Verifies JWT via provider JWKS: signature, aud, scope, exp</text>
+      <text x="996" y="786">Never sees the cookie; Swagger UI can run the code flow</text>
+    </g>
+
+    <!-- Step 9c: Resource server -> Provider JWKS -->
+    <path d="M1170 680 V600" stroke="#1f2937" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+    <text x="1182" y="632" font-size="11"><tspan font-weight="700">9c</tspan>  GET /jwks (cached)</text>
+    <text x="1182" y="645" font-size="11" fill="#6b7280">verify signature, aud, scope</text>
+
+    <!-- Legend -->
+    <g font-size="11" fill="#475569">
+      <line x1="40" y1="850" x2="90" y2="850" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="100" y="854">direct HTTP call</text>
+      <line x1="230" y1="850" x2="280" y2="850" stroke="#1f2937" stroke-width="1.5" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+      <text x="290" y="854">302 redirect, carried by the browser</text>
+      <line x1="520" y1="850" x2="570" y2="850" stroke="#c2410c" stroke-width="1.5" marker-end="url(#arrow-accent)"/>
+      <text x="580" y="854" fill="#c2410c">carries tokens · never crosses the trust boundary</text>
+    </g>
+    <text x="40" y="882" font-size="12" fill="#6b7280">Build order: Phase 1 browser + BFF + Google/GitHub → Phase 2 swap in Keycloak → Phase 3 add the resource server → Phase 4 replace the provider with your own FastAPI OP. The BFF does not change between phases.</text>
+  </g>
+</svg>
