@@ -15,10 +15,8 @@ def test_cors_rejects_other_origins(client):
     assert "access-control-allow-origin" not in response.headers
 
 
-def test_auth_routes_exist_but_are_stubbed(client):
+def test_unfinished_routes_are_stubbed(client):
     for method, path in [
-        ("GET", "/auth/google/login"),
-        ("GET", "/auth/google/callback"),
         ("GET", "/auth/me"),
         ("POST", "/auth/logout"),
         ("GET", "/api/profile"),

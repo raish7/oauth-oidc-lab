@@ -6,7 +6,7 @@ const BFF = process.env.NEXT_PUBLIC_BFF_URL ?? "http://localhost:8000";
 
 // Phase 1 fills this list. Sign-in links are rendered from it so a new
 // provider is one entry here and one entry in bff/app/providers.py.
-const PROVIDERS: { id: string; label: string }[] = [];
+const PROVIDERS: { id: string; label: string }[] = [{ id: "google", label: "Google" }];
 
 type Health = { status: "checking" } | { status: "ok" } | { status: "down"; detail: string };
 
