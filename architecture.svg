@@ -116,7 +116,7 @@
 
     <!-- ===== Postgres ===== -->
     <rect x="480" y="520" width="260" height="120" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
-    <text x="496" y="548" font-size="14" font-weight="700">Postgres · :5433</text>
+    <text x="496" y="548" font-size="14" font-weight="700">Postgres · :5434</text>
     <g font-size="11" font-family="Consolas, 'Courier New', monospace">
       <text x="496" y="574">users(id, sub, iss, email, name)</text>
       <text x="496" y="592">sessions(sid, user_id, access_token,</text>

@@ -24,7 +24,7 @@ Every numbered step below matches a numbered arrow in the diagram.
 | Browser | Your React / Next.js app | 3000 | Show the UI. Knows nothing about tokens. |
 | FastAPI BFF | Your Python backend. BFF = backend-for-frontend. In OAuth terms it is the **client**; OIDC calls it the **relying party**. | 8000 | Do the entire OAuth dance on the browser's behalf and keep every secret. |
 | Identity Provider | Whoever checks the user's password. OAuth calls it the **authorization server**; OIDC calls it the **OpenID Provider**. | Google/GitHub (internet), Keycloak 8080, your own 8002 | Log the user in, ask for consent, hand out tokens, publish the keys needed to verify them. |
-| Postgres | Your database | 5433 | Remember who each user is and hold their tokens server-side. |
+| Postgres | Your database | 5434 | Remember who each user is and hold their tokens server-side. |
 | FastAPI Resource Server | A second Python API that owns the protected data | 8001 | Accept a bearer token, verify it, return data. |
 
 ---
@@ -304,7 +304,7 @@ sequenceDiagram
     participant B as Browser (:3000)
     participant F as FastAPI BFF (:8000)
     participant P as Identity Provider
-    participant D as Postgres (:5433)
+    participant D as Postgres (:5434)
     participant R as Resource Server (:8001)
 
     B->>F: 1. GET /auth/login (full navigation)

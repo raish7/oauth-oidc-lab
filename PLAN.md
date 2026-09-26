@@ -22,7 +22,7 @@ oauth-oidc-lab/
   architecture.svg
   WORKFLOW.md
   PLAN.md
-  docker-compose.yml         # keycloak (P2); postgres if you don't reuse :5433
+  docker-compose.yml         # postgres :5434; keycloak :8080 (P2, profile "keycloak")
   bff/                       # FastAPI :8000  (P1)
     app/
       main.py                # app factory, CORS, routers
@@ -45,7 +45,7 @@ oauth-oidc-lab/
 
 - [ ] `git init` in this folder. Commit the three docs first.
 - [ ] Python 3.12 venv per service. Dependencies for the BFF: `fastapi`, `uvicorn[standard]`, `httpx`, `pyjwt[crypto]`, `itsdangerous`, `pydantic-settings`, `sqlalchemy`, `psycopg[binary]`, `cryptography`, `pytest`, `pytest-asyncio`.
-- [ ] Database: create `oauth_lab` on your existing Postgres on port 5433, or add a postgres service to compose on another port. Two tables to start:
+- [ ] Database: Postgres from `docker-compose.yml` on host port 5434. Port 5432 is the native PostgreSQL 17 on this machine and 5433 is the tracker project's container, so the lab takes the next one. Database `oauth_lab`, user `lab`. Two tables to start:
   ```sql
   CREATE TABLE users (
     id          bigserial PRIMARY KEY,

@@ -1,0 +1,36 @@
+[project]
+name = "oauth-lab-bff"
+version = "0.1.0"
+description = "Hand-rolled OAuth 2.0 / OIDC client (backend-for-frontend) for the lab"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "httpx>=0.27",
+    "pyjwt[crypto]>=2.9",
+    "itsdangerous>=2.2",
+    "pydantic-settings>=2.5",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "cryptography>=43",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.6",
+]
+
+# Plain application, not an installable package. `uv run` puts this directory on the path.
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: oauth-lab-postgres
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: lab
+      POSTGRES_DB: oauth_lab
+    ports:
+      # 5432 is the native PostgreSQL 17 on this machine and 5433 is the
+      # tracker project's container, so the lab takes 5434.
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d oauth_lab"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # Phase 2. Not started by default. Start with:
+  #   docker compose --profile keycloak up -d
+  # Admin console: http://localhost:8080  (admin / admin)
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3
+    container_name: oauth-lab-keycloak
+    profiles: ["keycloak"]
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - kcdata:/opt/keycloak/data
+
+volumes:
+  pgdata:
+  kcdata:
